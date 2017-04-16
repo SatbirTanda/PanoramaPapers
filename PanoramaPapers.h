@@ -1,22 +1,14 @@
 @interface SBIconScrollView : UIScrollView // Forward touches to new scrollview
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView;
+- (BOOL)isTweakEnabled;
 @end
 
 @interface SBIconListPageControl : UIPageControl // Get pages count for new scrollview width
+- (BOOL)isTweakEnabled;
 @end
 
 @interface SBFStaticWallpaperView : UIView // Add scrollview
-@end
-
-@interface SBRootFolderController : UIViewController
-- (void)viewDidAppear:(id)arg1;
-- (void)viewDidDisappear:(id)arg1;
-@end
-
-@interface SBFolderView : UIView
-@end
-
-@interface SBRootFolderView : SBFolderView <UIScrollViewDelegate>
+- (BOOL)isTweakEnabled;
 @end
 
 // handle dock blur <- by setting it after each scroll or other way

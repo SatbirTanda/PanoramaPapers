@@ -1,5 +1,12 @@
 #import "PanoramaPapers.h"
 #define IMAGE_PATH @"/var/mobile/Documents/"
+#define PLIST_FILENAME @"/var/mobile/Library/Preferences/com.sst1337.PanoramaPapers.plist"
+#define TWEAK "com.sst1337.PanoramaPapers"
+
+//PLIST KEYS
+#define ONOFF "OnOff"
+
+// DEBUG
 // NSString *text = [NSString stringWithFormat:@"%@",  @(myNumber)];
 
 static UIScrollView *panoramaScrollview = nil;
@@ -17,10 +24,19 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
 %hook SBIconScrollView
 
+%new
+- (BOOL)isTweakEnabled
+{
+    CFPreferencesAppSynchronize(CFSTR(TWEAK));
+    CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR(ONOFF), CFSTR(TWEAK));
+    if(value == nil) return YES;  
+    return [CFBridgingRelease(value) boolValue];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame
 {
     SBIconScrollView *icv = %orig;
-    if(!iconScrollview) iconScrollview = icv;
+    if(!iconScrollview && [self isTweakEnabled]) iconScrollview = icv;
     return icv;
 }
 
@@ -28,34 +44,46 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
 %hook SBIconListPageControl
 
+%new
+- (BOOL)isTweakEnabled
+{
+    CFPreferencesAppSynchronize(CFSTR(TWEAK));
+    CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR(ONOFF), CFSTR(TWEAK));
+    if(value == nil) return YES;  
+    return [CFBridgingRelease(value) boolValue];
+}
+
 - (void)setNumberOfPages:(NSInteger)pages 
 {
     %orig;
     numberOfPages = pages; 
-    if(wallpaper != NULL && panoramaScrollview == NULL)
+    if([self isTweakEnabled])
     {
-        panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
-        [panoramaScrollview setPagingEnabled:YES];
-        panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
-        [panoramaScrollview setContentOffset:CGPointMake(screenSize.width, 0)]; 
-        for(int i = 0; i < numberOfPages; i++) 
-        { 
-            CGFloat x = i * screenSize.width; 
-            NSString *imagePath = [IMAGE_PATH stringByAppendingPathComponent: [NSString stringWithFormat:@"image%d.png", i+1]]; 
-            UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(x, 0, screenSize.width, screenSize.height)];
-            imageView.contentMode = UIViewContentModeScaleAspectFill;
-            imageView.image = [UIImage imageWithContentsOfFile: imagePath];
+        if(wallpaper != NULL && panoramaScrollview == NULL)
+        {
+            panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
+            [panoramaScrollview setPagingEnabled:YES];
+            panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
+            [panoramaScrollview setContentOffset:CGPointMake(screenSize.width, 0)]; 
+            for(int i = 0; i < numberOfPages; i++) 
+            { 
+                CGFloat x = i * screenSize.width; 
+                NSString *imagePath = [IMAGE_PATH stringByAppendingPathComponent: [NSString stringWithFormat:@"image%d.png", i+1]]; 
+                UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(x, 0, screenSize.width, screenSize.height)];
+                imageView.contentMode = UIViewContentModeScaleAspectFill;
+                imageView.image = [UIImage imageWithContentsOfFile: imagePath];
 
-            if(imageView.image != NULL) [panoramaScrollview addSubview:imageView];  
-        }    
-        [wallpaper addSubview: panoramaScrollview];
+                if(imageView.image != NULL) [panoramaScrollview addSubview:imageView];  
+            }    
+            [wallpaper addSubview: panoramaScrollview];
+        }
     }
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
     SBIconListPageControl *pc = %orig;
-    if(!pageControl) pageControl = pc;
+    if(!pageControl && [self isTweakEnabled]) pageControl = pc;
     return pc;
 }
 
@@ -63,10 +91,19 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
 %hook SBFStaticWallpaperView
 
+%new
+- (BOOL)isTweakEnabled
+{
+    CFPreferencesAppSynchronize(CFSTR(TWEAK));
+    CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR(ONOFF), CFSTR(TWEAK));
+    if(value == nil) return YES;  
+    return [CFBridgingRelease(value) boolValue];
+}
+
 - (id)initWithFrame:(struct CGRect)arg1 wallpaperImage:(id)arg2 cacheGroup:(id)arg3 variant:(long long)arg4 options:(unsigned long long)arg5
 {
     SBFStaticWallpaperView *w = %orig;
-    if(!wallpaper) wallpaper = w;
+    if(!wallpaper && [self isTweakEnabled]) wallpaper = w;
     return w;
 }
 
@@ -92,8 +129,6 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
 %ctor 
 {
-    if(kCFCoreFoundationVersionNumber >= 1300) // iOS 10
-    {
-        %init(iOS10);
-    }
+
+    %init(iOS10);
 }
