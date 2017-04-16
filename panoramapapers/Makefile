@@ -1,10 +1,13 @@
+ARCHS = armv7 arm64
+
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = PanoramaPapers
 PanoramaPapers_FILES = SSTRootListController.m
 PanoramaPapers_INSTALL_PATH = /Library/PreferenceBundles
-PanoramaPapers_FRAMEWORKS = UIKit
+PanoramaPapers_FRAMEWORKS = Foundation UIKit CoreGraphics MobileCoreServices
 PanoramaPapers_PRIVATE_FRAMEWORKS = Preferences
+PanoramaPapers_CFLAGS = -Wno-error
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

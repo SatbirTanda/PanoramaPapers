@@ -1,4 +1,5 @@
 #import "PanoramaPapers.h"
+#define IMAGE_PATH @"/var/mobile/Documents/"
 // NSString *text = [NSString stringWithFormat:@"%@",  @(myNumber)];
 
 static UIScrollView *panoramaScrollview = nil;
@@ -9,58 +10,10 @@ static SBFStaticWallpaperView *wallpaper =nil;
 static NSInteger numberOfPages = 3;
 
 static CGSize screenSize = [UIScreen mainScreen].bounds.size;
-// static int kObservingNumberOfPagesChangesContext;
 
-// - (void)startObservingNumberOfPageChangesInPageControl:(SBIconListPageControl *)pageControl 
-// {
-//     [pageControl addObserver:self forKeyPath:@"numberOfPages" options:0 context:&kObservingNumberOfPagesChangesContext];
-// }
-
-// - (void)stopObservingContentSizeChangesInWebView:(SBIconListPageControl *)pageControl 
-// {
-//     [pageControl removeObserver:self forKeyPath:@"contentSize" context:&kObservingContentSizeChangesContext];
-// }
-
-// - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context 
-// {
-//     if (context == &kObservingNumberOfPagesChangesContext) 
-//     {
-//         SBIconListPageControl *pageControl = object;
-//         NSLog(@"%@ numberOfPages changed to %@", pageControl, pageControl.numberOfPages);
-//     } 
-//     else 
-//     {
-//         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-//     }
-// }
+static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesChangesContext;
 
 %group iOS10
-
-%hook SBRootFolderController
-
-- (id)initWithFolder:(id)arg1 orientation:(long long)arg2 viewMap:(id)arg3
-{
-    if(wallpaper != NULL && panoramaScrollview == NULL)
-    {
-        numberOfPages = pageControl.numberOfPages; // is zero
-        panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
-        panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
-        [panoramaScrollview setContentOffset:CGPointMake(screenSize.width, 0)]; 
-        for(int i = 0; i < numberOfPages; i++) 
-        { 
-            CGFloat x = i * screenSize.width;  
-            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(x, 0, screenSize.width, screenSize.height)];       
-            if(i == 0) view.backgroundColor = [UIColor greenColor];  
-            if(i == 1) view.backgroundColor = [UIColor blueColor];  
-            if(i == 2) view.backgroundColor = [UIColor redColor];  
-            [panoramaScrollview addSubview:view];  
-        }    
-        [wallpaper addSubview: panoramaScrollview];
-    }
-    return %orig;
-}
-
-%end
 
 %hook SBIconScrollView
 
@@ -74,6 +27,30 @@ static CGSize screenSize = [UIScreen mainScreen].bounds.size;
 %end
 
 %hook SBIconListPageControl
+
+- (void)setNumberOfPages:(NSInteger)pages 
+{
+    %orig;
+    numberOfPages = pages; 
+    if(wallpaper != NULL && panoramaScrollview == NULL)
+    {
+        panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
+        [panoramaScrollview setPagingEnabled:YES];
+        panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
+        [panoramaScrollview setContentOffset:CGPointMake(screenSize.width, 0)]; 
+        for(int i = 0; i < numberOfPages; i++) 
+        { 
+            CGFloat x = i * screenSize.width; 
+            NSString *imagePath = [IMAGE_PATH stringByAppendingPathComponent: [NSString stringWithFormat:@"image%d.png", i+1]]; 
+            UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(x, 0, screenSize.width, screenSize.height)];
+            imageView.contentMode = UIViewContentModeScaleAspectFill;
+            imageView.image = [UIImage imageWithContentsOfFile: imagePath];
+
+            if(imageView.image != NULL) [panoramaScrollview addSubview:imageView];  
+        }    
+        [wallpaper addSubview: panoramaScrollview];
+    }
+}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -100,7 +77,8 @@ static CGSize screenSize = [UIScreen mainScreen].bounds.size;
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView 
 {
     %orig;
-    if(iconScrollview != NULL && panoramaScrollview != NULL)
+
+    if(iconScrollview != NULL && panoramaScrollview != NULL && iconScrollview.contentOffset.x > 0 && iconScrollview.contentOffset.x < screenSize.width * (numberOfPages - 1))
     {
         CGPoint offset = panoramaScrollview.contentOffset;
         offset.x = iconScrollview.contentOffset.x;

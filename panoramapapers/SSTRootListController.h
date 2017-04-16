@@ -1,5 +1,7 @@
 #import <Preferences/PSListController.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 
-@interface SSTRootListController : PSListController
-
+@interface SSTRootListController: PSListController <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 @end
