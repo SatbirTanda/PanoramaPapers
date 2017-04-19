@@ -59,12 +59,10 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
     numberOfPages = pages; 
     if([self isTweakEnabled])
     {
-        if(wallpaper != NULL && panoramaScrollview == NULL)
+        if(wallpaper != NULL && panoramaScrollview == NULL && numberOfPages != 0)
         {
             panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
-            [panoramaScrollview setPagingEnabled:YES];
             panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
-            [panoramaScrollview setContentOffset:CGPointMake(screenSize.width, 0)]; 
             for(int i = 0; i < numberOfPages; i++) 
             { 
                 CGFloat x = i * screenSize.width; 
@@ -73,7 +71,16 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
                 imageView.contentMode = UIViewContentModeScaleAspectFill;
                 imageView.image = [UIImage imageWithContentsOfFile: imagePath];
 
-                if(imageView.image != NULL) [panoramaScrollview addSubview:imageView];  
+                if(imageView.image != NULL) [panoramaScrollview addSubview:imageView]; 
+                // UIView *view = [[UIView alloc] initWithFrame:  CGRectMake(x, 0, screenSize.width, screenSize.height)];
+                // if(i == 0) view.backgroundColor = [UIColor redColor];
+                // if(i == 1) view.backgroundColor = [UIColor blueColor];
+                // if(i == 2) view.backgroundColor = [UIColor purpleColor];
+                // if(i == 3) view.backgroundColor = [UIColor orangeColor];
+                // if(i == 4) view.backgroundColor = [UIColor greenColor];
+                // if(i == 5) view.backgroundColor = [UIColor yellowColor];
+                // if(view != NULL) [panoramaScrollview addSubview:view]; 
+
             }    
             [wallpaper addSubview: panoramaScrollview];
         }
@@ -127,8 +134,18 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
 %end
 
+%group iOS9
+
+%end
+
 %ctor 
 {
-
-    %init(iOS10);
+    if(kCFCoreFoundationVersionNumber >= 1300) // iOS 10
+    {
+        %init(iOS10);
+    }
+    else
+    {
+         %init(iOS9);
+    }
 }
