@@ -1,9 +1,10 @@
 Package: com.sst1337.panoramapapers
 Name: PanoramaPapers
 Depends: mobilesubstrate
-Version: 1.6.0
 Architecture: iphoneos-arm
 Description: Add a different image to each SpringBoard Screen!
 Maintainer: sst1337
 Author: sst1337
 Section: Tweaks
+Version: 1.6.0-2+debug
+Installed-Size: 292

@@ -11,4 +11,10 @@
 - (BOOL)isTweakEnabled;
 @end
 
+@interface _SBWallpaperWindow: UIWindow
+@end
+
+@interface SBSecureWindow: UIWindow
+@end
+
 // handle dock blur <- by setting it after each scroll or other way

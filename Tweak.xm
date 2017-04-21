@@ -25,6 +25,9 @@
 
 static UIScrollView *panoramaScrollview = nil;
 
+static _SBWallpaperWindow *wallpaperWindow = nil;
+static SBSecureWindow *secureWallpaperWindow = nil;
+
 static SBIconScrollView *iconScrollview = nil;
 static SBIconListPageControl *pageControl = nil;
 static SBFStaticWallpaperView *wallpaper =nil;
@@ -73,8 +76,9 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
     numberOfPages = pages; 
     if([self isTweakEnabled])
     {
-        if(wallpaper != NULL && panoramaScrollview == NULL && numberOfPages != 0)
+        if(wallpaperWindow != NULL && panoramaScrollview == NULL && numberOfPages != 0)
         {
+            [[wallpaperWindow subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];            
             panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
             panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
             for(int i = 0; i < numberOfPages; i++) 
@@ -87,7 +91,7 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
                 if(imageView.image != NULL) [panoramaScrollview addSubview:imageView]; 
             }    
-            [wallpaper addSubview: panoramaScrollview];
+            [wallpaperWindow addSubview: panoramaScrollview];
         }
     }
 }
@@ -116,6 +120,15 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 {
     SBFStaticWallpaperView *w = %orig;
     if(!wallpaper && [self isTweakEnabled]) wallpaper = w;
+    NSArray *windows = [UIApplication sharedApplication].windows;
+    for (UIWindow *window in windows) 
+    {
+        if ([NSStringFromClass([window class]) isEqualToString:@"_SBWallpaperWindow"]) 
+        {
+            wallpaperWindow = (_SBWallpaperWindow *)window;
+            break;
+        }
+    }
     return w;
 }
 
@@ -155,8 +168,8 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 - (instancetype)initWithFrame:(CGRect)frame
 {
     SBIconScrollView *icv = %orig;
-    if(!iconScrollview && [self isTweakEnabled]) iconScrollview = icv;
-    return icv;
+    if(!iconScrollview && [self isTweakEnabled]) iconScrollview= icv;
+    return icv; 
 }
 
 %end
@@ -178,8 +191,9 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
     numberOfPages = pages; 
     if([self isTweakEnabled])
     {
-        if(wallpaper != NULL && panoramaScrollview == NULL && numberOfPages != 0)
+        if(secureWallpaperWindow != NULL && panoramaScrollview == NULL && numberOfPages != 0)
         {
+            [[secureWallpaperWindow subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];            
             panoramaScrollview = [[UIScrollView alloc] initWithFrame: CGRectMake(0, 0, screenSize.width, screenSize.height)];
             panoramaScrollview.contentSize = CGSizeMake(screenSize.width * numberOfPages, screenSize.height);  
             for(int i = 0; i < numberOfPages; i++) 
@@ -192,7 +206,7 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 
                 if(imageView.image != NULL) [panoramaScrollview addSubview:imageView]; 
             }    
-            [wallpaper addSubview: panoramaScrollview];
+            [secureWallpaperWindow addSubview: panoramaScrollview];
         }
     }
 }
@@ -221,6 +235,15 @@ static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesCha
 {
     SBFStaticWallpaperView *w = %orig;
     if(!wallpaper && [self isTweakEnabled]) wallpaper = w;
+    NSArray *windows = [UIApplication sharedApplication].windows;
+    for (UIWindow *window in windows) 
+    {
+        if ([NSStringFromClass([window class]) isEqualToString:@"SBSecureWindow"]) 
+        {
+            secureWallpaperWindow = (SBSecureWindow *)window;
+            break;
+        }
+    }
     return w;
 }
 
