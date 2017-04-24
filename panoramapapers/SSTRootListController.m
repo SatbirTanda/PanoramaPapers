@@ -197,7 +197,7 @@ static NSString *imageName = @"image1.png";
     
     if (([UIImagePickerController isSourceTypeAvailable:
           
-          UIImagePickerControllerSourceTypeSavedPhotosAlbum] == NO)
+          UIImagePickerControllerSourceTypePhotoLibrary] == NO)
         
         || (delegate == nil)
         
@@ -209,7 +209,7 @@ static NSString *imageName = @"image1.png";
     
     UIImagePickerController *mediaUI = [[UIImagePickerController alloc] init];
     
-    mediaUI.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    mediaUI.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     
     
     // Displays saved pictures and movies, if both are available, from the
@@ -220,7 +220,7 @@ static NSString *imageName = @"image1.png";
     
     [UIImagePickerController availableMediaTypesForSourceType:
      
-     UIImagePickerControllerSourceTypeSavedPhotosAlbum];
+     UIImagePickerControllerSourceTypePhotoLibrary];
     
     
     

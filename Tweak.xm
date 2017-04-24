@@ -35,8 +35,6 @@ static NSInteger numberOfPages = 3;
 
 static CGSize screenSize = [UIScreen mainScreen].bounds.size;
 
-static void *kObservingNumberOfPagesChangesContext = &kObservingNumberOfPagesChangesContext;
-
 %group iOS10
 
 %hook SBIconScrollView
